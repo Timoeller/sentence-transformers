@@ -361,14 +361,15 @@ class SentenceTransformer(nn.Sequential):
 
         num_train_objectives = len(train_objectives)
 
-        for epoch in trange(epochs, desc="Epoch"):
+        for epoch in range(epochs):
+            print(f"Epoch Number: {epoch}")
             training_steps = 0
 
             for loss_model in loss_models:
                 loss_model.zero_grad()
                 loss_model.train()
 
-            for _ in trange(steps_per_epoch, desc="Iteration", smoothing=0.05):
+            for _ in trange(steps_per_epoch, desc="Iteration", position=0, leave=True):
                 for train_idx in range(num_train_objectives):
                     loss_model = loss_models[train_idx]
                     optimizer = optimizers[train_idx]

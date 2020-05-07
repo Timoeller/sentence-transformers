@@ -66,8 +66,8 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         self.dataloader.collate_fn = model.smart_batching_collate
 
         iterator = self.dataloader
-        if self.show_progress_bar:
-            iterator = tqdm(iterator, desc="Convert Evaluating")
+        # if self.show_progress_bar:
+        #     iterator = tqdm(iterator, desc="Convert Evaluating")
 
         for step, batch in enumerate(iterator):
             features, label_ids = batch_to_device(batch, self.device)
@@ -102,7 +102,7 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         eval_pearson_dot, _ = pearsonr(labels, dot_products)
         eval_spearman_dot, _ = spearmanr(labels, dot_products)
 
-        logging.info("Cosine-Similarity :\tPearson: {:.4f}\tSpearman: {:.4f}".format(
+        logging.info("\n\nCosine-Similarity :\tPearson: {:.4f}\tSpearman: {:.4f}".format(
             eval_pearson_cosine, eval_spearman_cosine))
         logging.info("Manhattan-Distance:\tPearson: {:.4f}\tSpearman: {:.4f}".format(
             eval_pearson_manhattan, eval_spearman_manhattan))
