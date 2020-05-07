@@ -1,14 +1,3 @@
-"""
-The system trains BERT (or any other transformer model like RoBERTa, DistilBERT etc.) on the SNLI + MultiNLI (AllNLI) dataset
-with softmax loss function. At every 1000 training steps, the model is evaluated on the
-STS benchmark dataset
-
-Usage:
-python training_nli.py
-
-OR
-python training_nli.py pretrained_transformer_model_name
-"""
 from torch.utils.data import DataLoader
 import math
 from sentence_transformers import models, losses
@@ -32,9 +21,11 @@ model_name = sys.argv[1] if len(sys.argv) > 1 else 'bert-base-uncased'
 
 # Read the dataset
 batch_size = 32
+# the lm_finetune_nips nips dataset needs to be downloaded from https://s3.eu-central-1.amazonaws.com/deepset.ai-farm-downstream/lm_finetune_nips.tar.gz
 ict_reader = myICTReader('../datasets/lm_finetune_nips')
-sts_reader = STSBenchmarkDataReader('../datasets/stsbenchmark')
+sts_reader = STSBenchmarkDataReader('../datasets/stsbenchmark') # this dataset is available through examples/datasets/get_data.py
 train_num_labels = ict_reader.get_num_labels()
+# the resulting model, e.g. "training_ict_bert-base-uncased-2020-05-07_15-48-42/0_Transformer" can be loaded into FARM or Huggingface as Language Model
 model_save_path = 'output/training_ict_'+model_name.replace("/", "-")+'-'+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
@@ -55,11 +46,10 @@ train_dataloader = DataLoader(train_data, shuffle=True, batch_size=batch_size)
 train_loss = losses.SoftmaxLoss(model=model, sentence_embedding_dimension=model.get_sentence_embedding_dimension(), num_labels=train_num_labels)
 
 # load dev evaluator with sentence similarity task
-# Finetuning Sentence Transformers with inverse cloze task + nips papers does not seem to
-# improve sentence similarity by much:
+# Finetuning Sentence Transformers with inverse cloze task + nips papers (does not seem to improve sentence similarity by much):
 # Without finetuning (vanilla bert) : Pearson: 0.5917	Spearman: 0.5932
 # With ICT finetuning after 3k steps: Pearson: 0.6574	Spearman: 0.6809
-# longer training does not improve on sentence sim
+# longer training does not improve the sentence similiarity
 logging.info("Read STSbenchmark dev dataset")
 dev_data = SentencesDataset(examples=sts_reader.get_examples('sts-dev.csv'), model=model)
 dev_dataloader = DataLoader(dev_data, shuffle=False, batch_size=batch_size)
