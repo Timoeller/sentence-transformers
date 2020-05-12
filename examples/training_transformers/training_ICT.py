@@ -41,11 +41,11 @@ model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
 
 
 # Convert the dataset to a DataLoader ready for training
-train_data = SentencesDataset(ict_reader.get_examples('dev.txt',max_examples=1000), model=model)
+train_data = SentencesDataset(ict_reader.get_examples('dev.txt',max_examples=6000), model=model)
 train_dataloader = DataLoader(train_data, shuffle=True, batch_size=batch_size)
 train_loss = losses.SoftmaxLoss(model=model, sentence_embedding_dimension=model.get_sentence_embedding_dimension(), num_labels=train_num_labels)
 
-# load dev evaluator with sentence similarity task
+# load dev evaluator with sentence similarity task sts-dev
 # Finetuning Sentence Transformers with inverse cloze task + nips papers (does not seem to improve sentence similarity by much):
 # Without finetuning (vanilla bert) : Pearson: 0.5917	Spearman: 0.5932
 # With ICT finetuning after 3k steps: Pearson: 0.6574	Spearman: 0.6809
@@ -65,7 +65,7 @@ logging.info("Warmup-steps: {}".format(warmup_steps))
 model.fit(train_objectives=[(train_dataloader, train_loss)],
           evaluator=evaluator,
           epochs=num_epochs,
-          evaluation_steps=1,
+          evaluation_steps=1000,
           warmup_steps=warmup_steps,
           output_path=model_save_path
           )
